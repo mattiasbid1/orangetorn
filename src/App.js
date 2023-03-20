@@ -1,23 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { Container } from "react-bootstrap";
+import Login from "./components/Login";
+import UserDetails from "./components/UserDetails";
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [userData, setUserData] = useState({});
+
+  const handleLogin = async (apiKey) => {
+    try {
+      const user = await UserDetails.fetchData(apiKey);
+      if (user.name) {
+        setLoggedIn(true);
+        setApiKey(apiKey);
+        setUserData(user);
+        return true;
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
+    return false;
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {!loggedIn ? (
+        <Login onLogin={handleLogin} />
+      ) : (
+        <Container fluid className="bg-dark text-white min-vh-100">
+          <UserDetails apiKey={apiKey} userData={userData.name} />
+        </Container>
+      )}
     </div>
   );
 }
